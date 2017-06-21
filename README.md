@@ -11,22 +11,6 @@ This supervised training relies on the NIST data set which contains 242466 spect
 2) Formula Labels:  The formula label is represented as a two-dimensional matrix with the rows equal to number of samples and the number of columns equal to the number of chemical elements.  For the purpose of predicting only the formulas from organic compounds, the number of elements equals 4 (Carbon, Hydrogen, Nitrogen, Oxygen).  The value of the matrix is an integer representing the number of atoms of the respective element contained in the compound.
 
 3) SMILES Labels:  The canonical SMILES maintains all the structural information of the molecule within a string (http://www.daylight.com/dayhtml/doc/theory/theory.smiles.html) The SMILES label is represented as a three-dimensional matrix in the form (number of samples x length of SMILES x vocabulary size of SMILES). A value of 1.0 is added if the character is present in that location in the SMILES string and a 0.0 elsewise.  For the NIST data, the length of the longest SMILES is 185 and there are 17 possible choices for the vocabulary.  Note that covalent Hydrogen is not needed as an explicit character since the location of hydrogen in a compound is easily determined from the canonical SMILES and elementary bonding rules. 
-The 17 characters used are:
-1:  C 
-2:  O           
-3:  N
-4:  =
-5:  #
-6:  (
-7:  )
-8:  1
-9:  2
-10: 3
-11: 4
-12: 5
-13: 6
-14: 7
-15: 8
-16: 9
-17: End of String 
+The 17 characters used are: C, O, N, =, #, (, ), 1, 2, 3, 4, 5, 6, 7, 8, 9, End of String
+
 
