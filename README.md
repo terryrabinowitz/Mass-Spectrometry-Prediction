@@ -13,4 +13,5 @@ This supervised training relies on the NIST data set which contains 242466 spect
 3) SMILES Labels:  The canonical SMILES maintains all the structural information of the molecule within a string (http://www.daylight.com/dayhtml/doc/theory/theory.smiles.html) The SMILES label is represented as a three-dimensional matrix in the form (number of samples x length of SMILES x vocabulary size of SMILES). A value of 1.0 is added if the character is present in that location in the SMILES string and a 0.0 elsewise.  For the NIST data, the length of the longest SMILES is 185 and there are 17 possible choices for the vocabulary.  Note that covalent Hydrogen is not needed as an explicit character since the location of hydrogen in a compound is easily determined from the canonical SMILES and elementary bonding rules. 
 The 17 characters used are: C, O, N, =, #, (, ), 1, 2, 3, 4, 5, 6, 7, 8, 9, End of String
 
-
+# Model (see spectra2formula_model.pdf and spectra2smiles_model.pdf for visual)
+1) spectra2formula:  The spectra input is fed into a variable level convolution subnetwork that follows the following repeating structure:  Convolution-> Pooling-> Batch Norm-> Dropout-> Elu Activation.  The resulting state is fed into a fully connected variable level dense subnetwork that follows the following repeating structure:  State-> Batch Norm -> Dropout -> Elu Activation
