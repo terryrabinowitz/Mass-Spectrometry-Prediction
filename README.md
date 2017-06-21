@@ -1,4 +1,4 @@
-# Gas Chromotography Mass Spectrometry (GC-MS) Prediction Models
+# Gas Chromotography - Mass Spectrometry (GC-MS) Prediction Models
 Two deep learning tensorflow models:
 1) spectra2formula:  predict molecular formula from GC-MS spectra
 2) spectra2smiles: predict SMILES (simplified molecular-input line-entry system notation) from GC-MS spectra
@@ -19,3 +19,6 @@ The 17 characters used are: C, O, N, =, #, (, ), 1, 2, 3, 4, 5, 6, 7, 8, 9, End 
 1) spectra2formula:  The spectra input is fed into a variable level convolution subnetwork that follows the following repeating structure:  Convolution-> Pooling-> Batch Norm-> Dropout-> Elu Activation.  The resulting state is fed into a fully connected variable level dense subnetwork that follows the following repeating structure:  State-> Batch Norm -> Dropout -> Elu Activation.  A final set of weights transforms the last state to the regression results for the four elements.
 
 2) spectra2smiles:  The spectra input is fed into a variable level convolution subnetwork that follows the following repeating structure:  Convolution-> Pooling-> Batch Norm-> Dropout-> Elu Activation.  The state from each convolution layer is fed into a fully connected variable level "translation" subnetwork.  The translated convolution states are then fed into their corresponding LSTM layer.  In addition to the translated convolution states, the LSTM subnetwork is input with a zero matrix the size of the SMILES labels.  A final set of weights transforms the output of the LSTM subnetwork to the SMILES prediction. 
+
+# Regularization
+Several techniques were tried in order to improve generalization performance.  These include the standard L2-regularization and node dropout methods as well as adding Gaussian noise to the gradiants during back propogation. (Arvind Neelakantan, Luke Vilnis, Quoc V. Le, Ilya Sutskever, Lukasz Kaiser, Karol Kurach, James Martens, "Adding Gradient Noise Improves Learning for Very Deep Networks", arXiv:1511.06807) 
