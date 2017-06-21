@@ -1,4 +1,4 @@
-# Mass-Spectrometry-Prediction
+# Gas Chromotography Mass Spectrometry (GC-MS) Prediction Models
 Two deep learning tensorflow models:
 1) spectra2formula:  predict molecular formula from GC-MS spectra
 2) spectra2smiles: predict SMILES (simplified molecular-input line-entry system notation) from GC-MS spectra
@@ -14,7 +14,7 @@ This supervised training relies on the NIST data set which contains 242466 spect
 The 17 characters used are: C, O, N, =, #, (, ), 1, 2, 3, 4, 5, 6, 7, 8, 9, End of String
 
 # Model 
-(see spectra2formula_model.pdf and spectra2smiles_model.pdf for visual)
+(see spectra2formula_model.pdf and spectra2smiles_model.pdf for visualization)
 
 1) spectra2formula:  The spectra input is fed into a variable level convolution subnetwork that follows the following repeating structure:  Convolution-> Pooling-> Batch Norm-> Dropout-> Elu Activation.  The resulting state is fed into a fully connected variable level dense subnetwork that follows the following repeating structure:  State-> Batch Norm -> Dropout -> Elu Activation.  A final set of weights transforms the last state to the regression results for the four elements.
 
