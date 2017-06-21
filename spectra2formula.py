@@ -13,7 +13,7 @@ np.set_printoptions(precision=3)
 np.set_printoptions(suppress=True)
 
 # -----Main Function-----
-TRAIN = True  # train a model else test data on previously created model
+TRAIN = False  # train a model else test data on previously created model
 
 # -----Training Parameters-----
 NUM_TRAIN = 100000  # number of samples to be used for training with the rest being validation
@@ -28,16 +28,16 @@ NUM_THREADS = 8
 GOOD_THRESHOLD = 0.5
 
 # -----Convolution Subnetwork Parameters-----
-MZ_SIZE = 600
-NUM_LAYERS_CONV = 3
-MZ_KERNAL_SIZE = [15] * NUM_LAYERS_CONV
-MZ_NUM_KERNALS = [200] * NUM_LAYERS_CONV
+SPECTRA_SIZE = 600
+NUM_LAYERS_CONV = 2
+MZ_KERNAL_SIZE = [25] * NUM_LAYERS_CONV
+MZ_NUM_KERNALS = [100] * NUM_LAYERS_CONV
 KEEP_PROB_CONV = 1.0
 CONV_BATCH_NORM_FLAG = True
 
 # -----Dense Subnetwork Parameters-----
-NUM_LAYERS_DENSE = 3
-MZ_NUM_NODES = [400] * NUM_LAYERS_DENSE
+NUM_LAYERS_DENSE = 2
+MZ_NUM_NODES = [100] * NUM_LAYERS_DENSE
 DENSE_BATCH_NORM_FLAG = True
 KEEP_PROB_DENSE = 1.0
 NUM_ELEMENTS = 4
@@ -67,10 +67,10 @@ if not os.path.exists(PATH_SAVE_VAL):
 
 # -----Data Path-----
 PATH_DATA = "/Users/terryrabinowitz/Desktop/compound_prediction/spectra2formula/"
-LABEL_PATH = PATH_DATA + "formula_regression_organic.npy"
-INPUT_PATH = PATH_DATA + "mz_organic.npy"
-LABEL_PATH_TEST = PATH_DATA + "formula_regression_organic_test.npy"
-INPUT_PATH_TEST = PATH_DATA + "mz_organic_test.npy"
+LABEL_PATH = PATH_DATA + "formula_shuffled_NEW.npy"
+INPUT_PATH = PATH_DATA + "mz_shuffled_NEW.npy"
+LABEL_PATH_TEST = PATH_DATA + "formula_shuffled_test_NEW.npy"
+INPUT_PATH_TEST = PATH_DATA + "mz_shuffled_test_NEW.npy"
 
 
 ####################################################
@@ -124,7 +124,7 @@ def model(mz_input, keep_prob_conv, keep_prob_dense):
     stride = [1, 1, 1, 1]
     padding = 'VALID'
     print mz_input.get_shape()
-    mz_input = tf.reshape(mz_input, shape=[-1, MZ_SIZE, 1, 1])
+    mz_input = tf.reshape(mz_input, shape=[-1, SPECTRA_SIZE, 1, 1])
     print mz_input.get_shape()
     kernal_encode = tf.Variable(tf.truncated_normal(shape=[MZ_KERNAL_SIZE[0], 1, 1, MZ_NUM_KERNALS[0]], stddev=0.1),
                                 name="conv_kernal_0")
@@ -185,12 +185,10 @@ def model(mz_input, keep_prob_conv, keep_prob_dense):
 
 def train():
     print
-    print("Getting Data")
+    print("Loading Data")
 
     formula = np.load(LABEL_PATH)
     mz = np.load(INPUT_PATH)
-
-    shuffle_in_unison(formula, mz)
 
     mz_train = mz[:NUM_TRAIN]
     mz_val = mz[NUM_TRAIN:]
@@ -206,7 +204,7 @@ def train():
     epoch_load_op = epoch.assign(loaded_epoch)
 
     learning_rate = tf.Variable(LEARN_RATE, trainable=False, dtype=tf.float32)
-    mz_x = tf.placeholder(dtype=tf.float32, shape=[BATCH_SIZE, MZ_SIZE])
+    mz_x = tf.placeholder(dtype=tf.float32, shape=[BATCH_SIZE, SPECTRA_SIZE])
     formula_x = tf.placeholder(dtype=tf.float32, shape=[BATCH_SIZE, NUM_ELEMENTS])
 
     keep_prob_conv = tf.placeholder(dtype=tf.float32)
@@ -258,7 +256,7 @@ def train():
     print("Running Session")
     with tf.Session(config=config) as sess:
 
-        if LOAD_MODEL:
+        if LOAD_TRAINING_MODEL:
             print("Reading model parameters from %s" % PATH_SAVE_TRAIN)
             saver.restore(sess, tf.train.latest_checkpoint(PATH_SAVE_TRAIN))
             tag = PATH_SAVE + "loss_summary.txt"
@@ -282,7 +280,6 @@ def train():
             shuffle_in_unison(formula_train, mz_train)
             loss_train = 0
             accuracy_train_hard = 0
-            accuracy_train_soft = 0
             counter = 0
             for batch_num in xrange(0, len(formula_train), BATCH_SIZE):
                 train_batch_mz = mz_train[batch_num:batch_num + BATCH_SIZE]
@@ -302,7 +299,6 @@ def train():
             loss_train /= counter
             loss_test = 0
             accuracy_test_hard = 0
-            accuracy_test_soft = 0
             counter = 0
             for batch_num in xrange(0, len(formula_val), BATCH_SIZE):
                 test_batch_mz = mz_val[batch_num:batch_num + BATCH_SIZE]
@@ -320,13 +316,13 @@ def train():
                 loss_test += loss
                 counter += 1
             accuracy_test_hard /= counter
-            accuracy_test_soft /= counter
             loss_test /= counter
 
             print loss_train, loss_test
-            print accuracy_train_soft, accuracy_test_soft
             print accuracy_train_hard, accuracy_test_hard
             print
+            tag = PATH_SAVE_TRAIN + "best_train_loss_model"
+            saver.save(sess, tag)
             if loss_test < previous_best:
                 previous_best = loss_test
                 tag = PATH_SAVE_VAL + "best_val_loss_model"
@@ -337,14 +333,68 @@ def train():
                     loss_test) + " " + str(accuracy_test_hard) + "\n"
                 with open(tag, "a") as myfile:
                     myfile.write(string)
-                tag = PATH_SAVE_TRAIN + "best_train_loss_model"
-                saver.save(sess, tag)
             sess.run(epoch_add_op)
 
 
 def test():
-    pass
+    print
+    print("Loading Data")
+    input_test = np.load(INPUT_PATH_TEST)
+    labels_test = np.load(LABEL_PATH_TEST)
 
+    mz_x = tf.placeholder(dtype=tf.float32, shape=[1, SPECTRA_SIZE])
+    formula_x = tf.placeholder(dtype=tf.float32, shape=[1, NUM_ELEMENTS])
+
+    keep_prob_conv = tf.placeholder(dtype=tf.float32)
+    keep_prob_dense = tf.placeholder(dtype=tf.float32)
+
+    formula_pred = model(mz_x, keep_prob_conv, keep_prob_dense)
+    formula_pred_int = tf.cast(formula_pred, tf.int32)
+    formula_true_int = tf.cast(formula_x, tf.int32)
+    matches = tf.reduce_sum(tf.cast(tf.equal(formula_pred_int, formula_true_int), tf.float32), axis=1)
+    perfect = tf.reduce_sum(tf.convert_to_tensor(np.ones(formula_x.get_shape()), dtype=tf.float32), axis=1)
+    accuracy_hard = tf.reduce_mean(tf.cast(tf.equal(matches, perfect), tf.float32))
+    total_parameters = 0
+    counter = 0
+    print
+    for variable in tf.trainable_variables():
+        shape = variable.get_shape()
+        variable_parameters = 1
+        for dim in shape:
+            variable_parameters *= dim.value
+        total_parameters += variable_parameters
+        counter += 1
+    print
+    print "Num Variables = ", counter, "\tTotal parameters = ", total_parameters
+    
+    saver = tf.train.Saver()
+    config = tf.ConfigProto(intra_op_parallelism_threads=NUM_THREADS,
+                            inter_op_parallelism_threads=NUM_THREADS,
+                            allow_soft_placement=True,
+                            device_count={'CPU': NUM_THREADS})
+    with tf.Session(config=config) as sess:
+        print("Reading model parameters from %s" % PATH_SAVE_VAL)
+        saver.restore(sess, tf.train.latest_checkpoint(PATH_SAVE_VAL))
+        
+        accuracy_train_hard = 0
+        for sample_num in xrange(len(labels_test)):
+            test_mz = input_test[sample_num]
+            test_mz = np.reshape(test_mz, (1, SPECTRA_SIZE))
+            test_formula = labels_test[sample_num]
+            test_formula = np.reshape(test_formula, (1, NUM_ELEMENTS))
+            accH, formula_out_test = sess.run(
+                [accuracy_hard, formula_pred],
+                feed_dict={formula_x: test_formula,
+                           mz_x: test_mz,
+                           keep_prob_conv: 1.0,
+                           keep_prob_dense: 1.0})
+            accuracy_train_hard += accH
+            print sample_num, accH
+        print
+        accuracy_train_hard /= len(labels_test)
+        print accuracy_train_hard
+    
+    
 
 ######################################################
 
