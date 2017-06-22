@@ -1,8 +1,4 @@
 """Builds the spectra2formula network.
-
-Summary of available functions:
- # train()
- # test()
 """
 
 import tensorflow as tf
@@ -13,19 +9,18 @@ np.set_printoptions(precision=3)
 np.set_printoptions(suppress=True)
 
 # -----Main Function-----
-TRAIN = False  # train a model else test data on previously created model
+TRAIN = False  # train a model if True / test the model if False
 
 # -----Training Parameters-----
 NUM_TRAIN = 100000  # number of samples to be used for training with the rest being validation
 LOAD_TRAINING_MODEL = False  # Continue training from previously saved model
 BATCH_SIZE = 100
 LEARN_RATE = 1.0e-2
-L2_WEIGHT = 0
+L2_WEIGHT = 0 # L2 regularization weight
 EPOCH_CHECK = 1  # How often to save model and record loss / accuarcy values
 CLIP = 0.0  # Clips gradiants to avoid overflow (not active if equal to 0)
 NOISE = 0  # The standard deviation of gaussian noise that is added to the gradiants during back propogation (not active if equal to 0)
 NUM_THREADS = 8
-GOOD_THRESHOLD = 0.5
 
 # -----Convolution Subnetwork Parameters-----
 SPECTRA_SIZE = 600
