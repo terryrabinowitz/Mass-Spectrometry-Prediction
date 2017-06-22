@@ -1,8 +1,4 @@
 """Builds the spectra2smiles network.
-
-Summary of available functions:
- # train()
- # test()
 """
 
 import tensorflow as tf
