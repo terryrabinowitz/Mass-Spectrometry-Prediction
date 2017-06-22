@@ -23,19 +23,19 @@ NOISE = 0  # The standard deviation of gaussian noise that is added to the gradi
 NUM_THREADS = 8
 
 # -----Convolution Subnetwork Parameters-----
-SPECTRA_SIZE = 600
+SPECTRA_SIZE = 600 # width of spectral input
 NUM_LAYERS_CONV = 2
 MZ_KERNAL_SIZE = [25] * NUM_LAYERS_CONV
 MZ_NUM_KERNALS = [100] * NUM_LAYERS_CONV
-KEEP_PROB_CONV = 1.0
+KEEP_PROB_CONV = 1.0  # Dropout in the convolution layers (1.0 = no dropout)
 CONV_BATCH_NORM_FLAG = True
 
 # -----Dense Subnetwork Parameters-----
 NUM_LAYERS_DENSE = 2
 MZ_NUM_NODES = [100] * NUM_LAYERS_DENSE
 DENSE_BATCH_NORM_FLAG = True
-KEEP_PROB_DENSE = 1.0
-NUM_ELEMENTS = 4
+KEEP_PROB_DENSE = 1.0  # Dropout in the dense layers (1.0 = no dropout)
+NUM_ELEMENTS = 4 # Number of classes in the output labels (carbon, hydrogen, nitrogen, oxygen)
 
 # -----Save Path-----
 TAG = "num_layers_conv_" + str(NUM_LAYERS_CONV) + "_"
